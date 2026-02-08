@@ -5,40 +5,31 @@
     <style>
         canvas {
             background: black;
-            display: block;
-            margin: 0 auto;
-        }
-        body {
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
-    <h1>Pong Game</h1>
-    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <canvas id="pong" width="800" height="400"></canvas>
     <script>
-        const canvas = document.getElementById('pongCanvas');
-        const ctx = canvas.getContext('2d');
-
+        const canvas = document.getElementById('pong');
+        const context = canvas.getContext('2d');
         let playerScore = 0;
-        let aiScore = 0;
+        let computerScore = 0;
 
         function drawScore() {
-            ctx.fillStyle = 'white';
-            ctx.font = '32px Arial';
-            ctx.fillText('Player: ' + playerScore, 50, 50);
-            ctx.fillText('AI: ' + aiScore, canvas.width - 150, 50);
+            context.font = '20px Arial';
+            context.fillStyle = 'white';
+            context.fillText('Player: ' + playerScore, 20, 30);
+            context.fillText('Computer: ' + computerScore, canvas.width - 150, 30);
         }
 
-        function gameLoop() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawScore(); // Draw the score on the canvas
-            // Other game logic goes here
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawScore();
+            // Other game drawing logic goes here...
         }
 
-        setInterval(gameLoop, 1000 / 60); // 60 frames per second
+        setInterval(draw, 1000 / 60);
     </script>
 </body>
 </html>
