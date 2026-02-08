@@ -1,71 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pong Game</title>
     <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: black; }
-        canvas { border: 2px solid white; }
-        #score { color: white; font-size: 24px; text-align: center; }
+        canvas {
+            background: black;
+            display: block;
+            margin: auto;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
     <canvas id="pong" width="800" height="400"></canvas>
-    <div id="score">Player: 0 AI: 0</div>
-
     <script>
-        const canvas = document.getElementById('pong');
-        const ctx = canvas.getContext('2d');
-
-        let player = { x: 0, y: canvas.height / 2 - 50, width: 10, height: 100, score: 0 };
-        let ai = { x: canvas.width - 10, y: canvas.height / 2 - 50, width: 10, height: 100, score: 0 };
-        let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 10, speed: 5, velocityX: 5, velocityY: 5 };
-
-        document.addEventListener('mousemove', (event) => {
-            let rect = canvas.getBoundingClientRect();
-            player.y = event.clientY - rect.top - player.height / 2;
-        });
-
-        function resetBall() {
-            ball.x = canvas.width / 2;
-            ball.y = canvas.height / 2;
-            ball.velocityX = -ball.velocityX;
-        }
+        const canvas = document.getElementById("pong");
+        const context = canvas.getContext("2d");
+        let paddleWidth = 10, paddleHeight = 100;
+        let playerPaddleY = (canvas.height - paddleHeight) / 2;
+        let aiPaddleY = (canvas.height - paddleHeight) / 2;
+        let ballRadius = 10;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballSpeedX = 5, ballSpeedY = 5;
+        let playerScore = 0, aiScore = 0;
 
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, false);
-            ctx.fill();
-            ctx.fillText(`Player: ${player.score} AI: ${ai.score}`, canvas.width / 2 - 50, 30);
+            // Clear Canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Player Paddle
+            context.fillStyle = "white";
+            context.fillRect(0, playerPaddleY, paddleWidth, paddleHeight);
+            // Draw AI Paddle
+            context.fillRect(canvas.width - paddleWidth, aiPaddleY, paddleWidth, paddleHeight);
+            // Draw Ball
+            context.beginPath();
+            context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            context.fill();
+            context.closePath();
         }
 
         function update() {
-            ball.x += ball.velocityX;
-            ball.y += ball.velocityY;
+            // Move ball
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
 
-            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) ball.velocityY = -ball.velocityY;
+            // Ball collision with top and bottom
+            if (ballY + ballRadius > canvas.height || ballY - ballRadius < 0) {
+                ballSpeedY = -ballSpeedY;
+            }
 
-            let playerCollide = ball.x < player.x + player.width && ball.y > player.y && ball.y < player.y + player.height;
-            let aiCollide = ball.x + ball.radius > ai.x && ball.y > ai.y && ball.y < ai.y + ai.height;
+            // Ball collision with paddles
+            if (ballX - ballRadius < paddleWidth && ballY > playerPaddleY && ballY < playerPaddleY + paddleHeight ||
+                ballX + ballRadius > canvas.width - paddleWidth && ballY > aiPaddleY && ballY < aiPaddleY + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
 
-            if (playerCollide || aiCollide) ball.velocityX = -ball.velocityX;
+            // AI Paddle Movement
+            if (aiPaddleY + paddleHeight / 2 < ballY) {
+                aiPaddleY += 4;
+            } else {
+                aiPaddleY -= 4;
+            }
 
-            if (ball.x - ball.radius < 0) { ai.score++; resetBall(); }
-            if (ball.x + ball.radius > canvas.width) { player.score++; resetBall(); }
-
-            ai.y += ((ball.y - (ai.y + ai.height / 2)) * 0.1);
+            // Score
+            if (ballX + ballRadius > canvas.width) {
+                playerScore++;
+                resetBall();
+            } else if (ballX - ballRadius < 0) {
+                aiScore++;
+                resetBall();
+            }
         }
 
-        function game() {
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = -ballSpeedX;
+        }
+
+        function gameLoop() {
             draw();
             update();
-            requestAnimationFrame(game);
+            requestAnimationFrame(gameLoop);
         }
 
-        game();
+        // Player controls
+        document.addEventListener("mousemove", (event) => {
+            const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+            if (mouseY > 0 && mouseY < canvas.height - paddleHeight) {
+                playerPaddleY = mouseY;
+            }
+        });
+
+        gameLoop();
     </script>
 </body>
 </html>
