@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong Game</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: black; }
+        canvas { border: 2px solid white; }
+        #score { color: white; font-size: 24px; text-align: center; }
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="400"></canvas>
+    <div id="score">Player: 0 AI: 0</div>
+
+    <script>
+        const canvas = document.getElementById('pong');
+        const ctx = canvas.getContext('2d');
+
+        let player = { x: 0, y: canvas.height / 2 - 50, width: 10, height: 100, score: 0 };
+        let ai = { x: canvas.width - 10, y: canvas.height / 2 - 50, width: 10, height: 100, score: 0 };
+        let ball = { x: canvas.width / 2, y: canvas.height / 2, radius: 10, speed: 5, velocityX: 5, velocityY: 5 };
+
+        document.addEventListener('mousemove', (event) => {
+            let rect = canvas.getBoundingClientRect();
+            player.y = event.clientY - rect.top - player.height / 2;
+        });
+
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.velocityX = -ball.velocityX;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, false);
+            ctx.fill();
+            ctx.fillText(`Player: ${player.score} AI: ${ai.score}`, canvas.width / 2 - 50, 30);
+        }
+
+        function update() {
+            ball.x += ball.velocityX;
+            ball.y += ball.velocityY;
+
+            if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) ball.velocityY = -ball.velocityY;
+
+            let playerCollide = ball.x < player.x + player.width && ball.y > player.y && ball.y < player.y + player.height;
+            let aiCollide = ball.x + ball.radius > ai.x && ball.y > ai.y && ball.y < ai.y + ai.height;
+
+            if (playerCollide || aiCollide) ball.velocityX = -ball.velocityX;
+
+            if (ball.x - ball.radius < 0) { ai.score++; resetBall(); }
+            if (ball.x + ball.radius > canvas.width) { player.score++; resetBall(); }
+
+            ai.y += ((ball.y - (ai.y + ai.height / 2)) * 0.1);
+        }
+
+        function game() {
+            draw();
+            update();
+            requestAnimationFrame(game);
+        }
+
+        game();
+    </script>
+</body>
+</html>
