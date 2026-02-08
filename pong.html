@@ -1,110 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pong Game</title>
     <style>
         canvas {
             background: black;
             display: block;
-            margin: auto;
+            margin: 0 auto;
         }
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            text-align: center;
             color: white;
             font-family: Arial, sans-serif;
         }
     </style>
 </head>
 <body>
-    <canvas id="pong" width="800" height="400"></canvas>
+    <h1>Pong Game</h1>
+    <canvas id="pongCanvas" width="800" height="400"></canvas>
     <script>
-        const canvas = document.getElementById("pong");
-        const context = canvas.getContext("2d");
-        let paddleWidth = 10, paddleHeight = 100;
-        let playerPaddleY = (canvas.height - paddleHeight) / 2;
-        let aiPaddleY = (canvas.height - paddleHeight) / 2;
-        let ballRadius = 10;
-        let ballX = canvas.width / 2;
-        let ballY = canvas.height / 2;
-        let ballSpeedX = 5, ballSpeedY = 5;
-        let playerScore = 0, aiScore = 0;
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
 
-        function draw() {
-            // Clear Canvas
-            context.clearRect(0, 0, canvas.width, canvas.height);
+        let playerScore = 0;
+        let aiScore = 0;
 
-            // Draw Player Paddle
-            context.fillStyle = "white";
-            context.fillRect(0, playerPaddleY, paddleWidth, paddleHeight);
-            // Draw AI Paddle
-            context.fillRect(canvas.width - paddleWidth, aiPaddleY, paddleWidth, paddleHeight);
-            // Draw Ball
-            context.beginPath();
-            context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-            context.fill();
-            context.closePath();
-        }
-
-        function update() {
-            // Move ball
-            ballX += ballSpeedX;
-            ballY += ballSpeedY;
-
-            // Ball collision with top and bottom
-            if (ballY + ballRadius > canvas.height || ballY - ballRadius < 0) {
-                ballSpeedY = -ballSpeedY;
-            }
-
-            // Ball collision with paddles
-            if (ballX - ballRadius < paddleWidth && ballY > playerPaddleY && ballY < playerPaddleY + paddleHeight ||
-                ballX + ballRadius > canvas.width - paddleWidth && ballY > aiPaddleY && ballY < aiPaddleY + paddleHeight) {
-                ballSpeedX = -ballSpeedX;
-            }
-
-            // AI Paddle Movement
-            if (aiPaddleY + paddleHeight / 2 < ballY) {
-                aiPaddleY += 4;
-            } else {
-                aiPaddleY -= 4;
-            }
-
-            // Score
-            if (ballX + ballRadius > canvas.width) {
-                playerScore++;
-                resetBall();
-            } else if (ballX - ballRadius < 0) {
-                aiScore++;
-                resetBall();
-            }
-        }
-
-        function resetBall() {
-            ballX = canvas.width / 2;
-            ballY = canvas.height / 2;
-            ballSpeedX = -ballSpeedX;
+        function drawScore() {
+            ctx.fillStyle = 'white';
+            ctx.font = '32px Arial';
+            ctx.fillText('Player: ' + playerScore, 50, 50);
+            ctx.fillText('AI: ' + aiScore, canvas.width - 150, 50);
         }
 
         function gameLoop() {
-            draw();
-            update();
-            requestAnimationFrame(gameLoop);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawScore(); // Draw the score on the canvas
+            // Other game logic goes here
         }
 
-        // Player controls
-        document.addEventListener("mousemove", (event) => {
-            const mouseY = event.clientY - canvas.getBoundingClientRect().top;
-            if (mouseY > 0 && mouseY < canvas.height - paddleHeight) {
-                playerPaddleY = mouseY;
-            }
-        });
-
-        gameLoop();
+        setInterval(gameLoop, 1000 / 60); // 60 frames per second
     </script>
 </body>
 </html>
